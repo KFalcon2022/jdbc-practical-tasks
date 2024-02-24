@@ -99,6 +99,39 @@ public class Main {
         passengerRepository.findAll();
     }
 
+    private void executeParameterizedQueryWithPreparedStatementExample() {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from passenger where id = ?")) {
+
+            // ... - Подготовка данных для выполнения запроса
+
+            ResultSet result = statement.executeQuery();
+
+            // ... - Дальнейшая обработка ResultSet
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void executeStaticQueryWithPreparedStatementExample() {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from passenger")) {
+
+            ResultSet result = statement.executeQuery();
+
+            // ... - Дальнейшая обработка ResultSet
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void findPassengersByFullNameExample() {
+        var passengerMapper = new PassengerMapper();
+        var passengerRepository = new PassengerRepository(passengerMapper);
+
+        passengerRepository.findByFullName("Ivan", "Ivanov");
+    }
+
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/test_db",
