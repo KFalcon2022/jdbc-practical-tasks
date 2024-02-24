@@ -10,6 +10,9 @@ import java.sql.*;
 /**
  * Задача урока 129:
  * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/129/Statement.%20DDL.%20ResultSet.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
+ * <p>
+ * Задача урока 130:
+ * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/130/PreparedStatement.%20SQL%20injection.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
  */
 public class Main {
     private final static Logger log = LogManager.getLogger(Main.class);
@@ -101,6 +104,39 @@ public class Main {
         var passengerRepository = new PassengerRepository(passengerMapper);
 
         passengerRepository.findAll();
+    }
+
+    private void executeParameterizedQueryWithPreparedStatementExample() {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from passenger where id = ?")) {
+
+            // ... - Подготовка данных для выполнения запроса
+
+            ResultSet result = statement.executeQuery();
+
+            // ... - Дальнейшая обработка ResultSet
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void executeStaticQueryWithPreparedStatementExample() {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from passenger")) {
+
+            ResultSet result = statement.executeQuery();
+
+            // ... - Дальнейшая обработка ResultSet
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void findPassengersByFullNameExample() {
+        var passengerMapper = new PassengerMapper();
+        var passengerRepository = new PassengerRepository(passengerMapper);
+
+        passengerRepository.findByFullName("Ivan", "Ivanov");
     }
 
     private Connection getConnection() throws SQLException {
