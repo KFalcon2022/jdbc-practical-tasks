@@ -1,11 +1,13 @@
 package com.walking.jdbc;
 
 import com.walking.jdbc.mapper.PassengerMapper;
+import com.walking.jdbc.model.Passenger;
 import com.walking.jdbc.repository.PassengerRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
+import java.util.Collection;
 
 /**
  * Задача урока 129:
@@ -13,6 +15,9 @@ import java.sql.*;
  * <p>
  * Задача урока 130:
  * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/130/PreparedStatement.%20SQL%20injection.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
+ * <p>
+ * Задача урока 131:
+ * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/131/Batch.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
  */
 public class Main {
     private final static Logger log = LogManager.getLogger(Main.class);
@@ -137,6 +142,58 @@ public class Main {
         var passengerRepository = new PassengerRepository(passengerMapper);
 
         passengerRepository.findByFullName("Ivan", "Ivanov");
+    }
+
+    private void addBatchStatementExampleExample() {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+
+            statement.addBatch("insert into passenger (first_name, last_name, birth_date) values ('Name0', 'Surname0', '1997-12-20')");
+            statement.addBatch("insert into passenger (first_name, last_name, birth_date) values ('Name1', 'Surname1', '1997-12-20')");
+            statement.addBatch("insert into passenger (first_name, last_name, birth_date) values ('Name2', 'Surname2', '1997-12-20')");
+            statement.addBatch("update passenger set first_name = 'IVAN' where id = 1");
+
+//            ... - Выполнение батча
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void executeBatchStatementExampleExample() {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+
+            statement.addBatch("insert into passenger (first_name, last_name, birth_date) values ('Name0', 'Surname0', '1997-12-20')");
+            statement.addBatch("insert into passenger (first_name, last_name, birth_date) values ('Name1', 'Surname1', '1997-12-20')");
+            statement.addBatch("insert into passenger (first_name, last_name, birth_date) values ('Name2', 'Surname2', '1997-12-20')");
+            statement.addBatch("update passenger set first_name = 'IVAN' where id = 1");
+
+            statement.executeBatch();
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void addBatchPreparedStatementExampleExample(Collection<Passenger> passengers) {
+        var sql = "insert into passenger (first_name, last_name, birth_date) values (?, ?, ?)";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            for (Passenger passenger : passengers) {
+                statement.setString(1, passenger.getFirstName());
+                statement.setString(2, passenger.getLastName());
+
+                Date birthDate = Date.valueOf(passenger.getBirthDate());
+                statement.setDate(3, birthDate);
+
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+        } catch (SQLException e) {
+            log.error(e);
+        }
     }
 
     private Connection getConnection() throws SQLException {
