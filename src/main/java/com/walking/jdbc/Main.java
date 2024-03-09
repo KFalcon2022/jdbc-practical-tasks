@@ -186,6 +186,29 @@ public class Main {
         }
     }
 
+    private void executeInTransactionExample() {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+
+            connection.setAutoCommit(false);
+
+//            Опционально. В данном случае - установка уровня изоляции REPEATABLE READ
+            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+
+            try {
+                statement.executeUpdate("insert into passenger (first_name, last_name, birth_date) values ('Name2', 'Surname2', '1997-12-20')");
+                statement.executeUpdate("update passenger set first_name = 'IVAN' where id = 1");
+
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                log.error("Транзакция была откачена");
+            }
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/test_db",
