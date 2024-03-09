@@ -18,6 +18,9 @@ import java.util.Collection;
  * <p>
  * Задача урока 131:
  * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/131/Batch.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
+ * <p>
+ * Задача урока 132:
+ * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/132/JDBC.%20Tranastions.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
  */
 public class Main {
     private final static Logger log = LogManager.getLogger(Main.class);
@@ -191,6 +194,29 @@ public class Main {
             }
 
             statement.executeBatch();
+        } catch (SQLException e) {
+            log.error(e);
+        }
+    }
+
+    private void executeInTransactionExample() {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+
+            connection.setAutoCommit(false);
+
+//            Опционально. В данном случае - установка уровня изоляции REPEATABLE READ
+            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+
+            try {
+                statement.executeUpdate("insert into passenger (first_name, last_name, birth_date) values ('Name2', 'Surname2', '1997-12-20')");
+                statement.executeUpdate("update passenger set first_name = 'IVAN' where id = 1");
+
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                log.error("Транзакция была откачена");
+            }
         } catch (SQLException e) {
             log.error(e);
         }
