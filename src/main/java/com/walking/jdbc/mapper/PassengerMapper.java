@@ -6,10 +6,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class PassengerMapper {
 
-    public List<Passenger> map(ResultSet rs) throws SQLException {
+    public Optional<Passenger> map(ResultSet rs) throws SQLException {
+        return rs.next() ? Optional.of(mapRow(rs)) : Optional.empty();
+    }
+
+    public List<Passenger> mapMany(ResultSet rs) throws SQLException {
         var passengers = new ArrayList<Passenger>();
 
         while (rs.next()) {
